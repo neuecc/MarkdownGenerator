@@ -10,13 +10,20 @@ namespace MarkdownWikiGenerator
 {
     class Program
     {
+        // 0 = dll src path, 1 = dest root
         static void Main(string[] args)
         {
             // put dll & xml on same diretory.
             var target = "UniRx.dll"; // :)
+            string dest = "md";
             if (args.Length == 1)
             {
                 target = args[0];
+            }
+            else if (args.Length == 2)
+            {
+                target = args[0];
+                dest = args[1];
             }
 
             var types = MarkdownGenerator.Load(target);
@@ -28,7 +35,7 @@ namespace MarkdownWikiGenerator
 
             foreach (var g in types.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
             {
-                if (!Directory.Exists("md")) Directory.CreateDirectory("md");
+                if (!Directory.Exists(dest)) Directory.CreateDirectory(dest);
 
                 homeBuilder.HeaderWithLink(2, g.Key, g.Key);
                 homeBuilder.AppendLine();
@@ -41,12 +48,12 @@ namespace MarkdownWikiGenerator
                     sb.Append(item.ToString());
                 }
 
-                File.WriteAllText(@"md\" + g.Key + ".md", sb.ToString());
+                File.WriteAllText(Path.Combine(dest, g.Key + ".md"), sb.ToString());
                 homeBuilder.AppendLine();
             }
 
             // Gen Home
-            File.WriteAllText(@"md\Home.md", homeBuilder.ToString());
+            File.WriteAllText(Path.Combine(dest, "Home.md"), homeBuilder.ToString());
         }
     }
 }

@@ -67,6 +67,13 @@ namespace MarkdownWikiGenerator
                 .ToArray();
         }
 
+        EventInfo[] GetEvents()
+        {
+            return type.GetEvents(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
+                .ToArray();
+        }
+
         PropertyInfo[] GetStaticProperties()
         {
             return type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty)
@@ -102,6 +109,12 @@ namespace MarkdownWikiGenerator
                 .ToArray();
         }
 
+        EventInfo[] GetStaticEvents()
+        {
+            return type.GetEvents(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
+                .ToArray();
+        }
         void BuildTable<T>(MarkdownBuilder mb, string label, T[] array, IEnumerable<XmlDocumentComment> docs, Func<T, string> type, Func<T, string> name, Func<T, string> finalName)
         {
             if (array.Any())
@@ -174,10 +187,11 @@ namespace MarkdownWikiGenerator
             {
                 BuildTable(mb, "Fields", GetFields(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.FieldType), x => x.Name, x => x.Name);
                 BuildTable(mb, "Properties", GetProperties(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.PropertyType), x => x.Name, x => x.Name);
+                BuildTable(mb, "Events", GetEvents(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.EventHandlerType), x => x.Name, x => x.Name);
                 BuildTable(mb, "Methods", GetMethods(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.ReturnType), x => x.Name, x => Beautifier.ToMarkdownMethodInfo(x));
                 BuildTable(mb, "Static Properties", GetStaticProperties(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.PropertyType), x => x.Name, x => x.Name);
                 BuildTable(mb, "Static Methods", GetStaticMethods(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.ReturnType), x => x.Name, x => Beautifier.ToMarkdownMethodInfo(x));
-                // BuildTable(sb, "event", item.events, commentsLookup[item.type.FullName], x => Type.EmptyTypes.First(), x => x.Name);
+                BuildTable(mb, "Static Events", GetStaticEvents(), commentLookup[type.FullName], x => Beautifier.BeautifyType(x.EventHandlerType), x => x.Name, x => x.Name);
             }
 
             return mb.ToString();
@@ -191,7 +205,11 @@ namespace MarkdownWikiGenerator
         {
             var xmlPath = Path.Combine(Directory.GetParent(dllPath).FullName, Path.GetFileNameWithoutExtension(dllPath) + ".xml");
 
-            var comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)));
+            XmlDocumentComment[] comments = new XmlDocumentComment[0];
+            if (File.Exists(xmlPath))
+            {
+                comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)));
+            }
             var commentsLookup = comments.ToLookup(x => x.ClassName);
 
             var markdownableTypes = new[] { Assembly.LoadFrom(dllPath) }
