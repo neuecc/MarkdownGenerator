@@ -1,4 +1,4 @@
-MarkdownWikiGenerator
+MarkdownGenerator
 ===
 Generate markdown from C# binary & xml document for GitHub Wiki.
 
@@ -17,5 +17,5 @@ Put .xml on same directory, use document comment for generate.
 for example
 
 ```
-MarkdownWikiGenerator.exe UniRx.dll md
+MarkdownGenerator.exe UniRx.dll md
 ```

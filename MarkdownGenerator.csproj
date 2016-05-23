@@ -7,8 +7,8 @@
     <ProjectGuid>{2058B4FD-7008-4213-A2A5-9C730446CCE3}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MarkdownWikiGenerator</RootNamespace>
-    <AssemblyName>MarkdownWikiGenerator</AssemblyName>
+    <RootNamespace>MarkdownGenerator</RootNamespace>
+    <AssemblyName>MarkdownGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
