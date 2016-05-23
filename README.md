@@ -1,4 +1,4 @@
-MarkdownWikiGenerator
+MarkdownGenerator
 ===
 Generate markdown from C# binary & xml document for GitHub Wiki.
 
