@@ -17,6 +17,7 @@ namespace MarkdownWikiGenerator
 
         public string Namespace => type.Namespace;
         public string Name => type.Name;
+        public string BeautifyName => Beautifier.BeautifyType(type);
 
         public MarkdownableType(Type type, ILookup<string, XmlDocumentComment> commentLookup)
         {

@@ -49,6 +49,17 @@ namespace MarkdownWikiGenerator
             sb.AppendLine();
         }
 
+        public void HeaderWithLink(int level, string text, string url)
+        {
+            for (int i = 0; i < level; i++)
+            {
+                sb.Append("#");
+            }
+            sb.Append(" ");
+            Link(text, url);
+            sb.AppendLine();
+        }
+
         public void Link(string text, string url)
         {
             sb.Append("[");
@@ -109,6 +120,19 @@ namespace MarkdownWikiGenerator
                 }
                 sb.AppendLine();
             }
+            sb.AppendLine();
+        }
+
+        public void List(string text) // nest zero
+        {
+            sb.Append("- ");
+            sb.AppendLine(text);
+        }
+
+        public void ListLink(string text, string url) // nest zero
+        {
+            sb.Append("- ");
+            Link(text, url);
             sb.AppendLine();
         }
 
