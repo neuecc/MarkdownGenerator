@@ -43,7 +43,7 @@ namespace MarkdownWikiGenerator
                 var sb = new StringBuilder();
                 foreach (var item in g.OrderBy(x => x.Name))
                 {
-                    homeBuilder.ListLink(MarkdownBuilder.MarkdownCodeQuote(item.BeautifyName), g.Key + "#" + item.BeautifyName.Replace("<", "").Replace(">", "").Replace(",", "").Replace(" ", "-").ToLower());
+                    homeBuilder.ListLink(MarkdownBuilder.MarkdownCodeQuote(item.BeautifyName), g.Key + ".md#" + item.BeautifyName.Replace("<", "").Replace(">", "").Replace(",", "").Replace(" ", "-").ToLower());
 
                     sb.Append(item.ToString());
                 }
