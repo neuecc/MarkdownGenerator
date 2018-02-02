@@ -209,7 +209,7 @@ namespace MarkdownWikiGenerator
 
     public static class MarkdownGenerator
     {
-        public static MarkdownableType[] Load(string dllPath)
+        public static MarkdownableType[] Load(string dllPath, string namespaceMatch)
         {
             var xmlPath = Path.Combine(Directory.GetParent(dllPath).FullName, Path.GetFileNameWithoutExtension(dllPath) + ".xml");
 
@@ -219,6 +219,9 @@ namespace MarkdownWikiGenerator
                 comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)));
             }
             var commentsLookup = comments.ToLookup(x => x.ClassName);
+
+            var namespaceRegex = 
+                !string.IsNullOrEmpty(namespaceMatch) ? new Regex(namespaceMatch) : null;
 
             var markdownableTypes = new[] { Assembly.LoadFrom(dllPath) }
                 .SelectMany(x =>
@@ -238,11 +241,19 @@ namespace MarkdownWikiGenerator
                 })
                 .Where(x => x != null)
                 .Where(x => x.IsPublic && !typeof(Delegate).IsAssignableFrom(x) && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
+                .Where(x => IsRequiredNamespace(x, namespaceRegex))
                 .Select(x => new MarkdownableType(x, commentsLookup))
                 .ToArray();
 
 
             return markdownableTypes;
+        }
+
+        static bool IsRequiredNamespace(Type type, Regex regex) {
+            if ( regex == null ) {
+                return true;
+            }
+            return regex.IsMatch(type.Namespace != null ? type.Namespace : string.Empty);
         }
     }
 }
