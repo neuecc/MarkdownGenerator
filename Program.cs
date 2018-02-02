@@ -16,6 +16,7 @@ namespace MarkdownWikiGenerator
             // put dll & xml on same diretory.
             var target = "UniRx.dll"; // :)
             string dest = "md";
+            string namespaceMatch = string.Empty;
             if (args.Length == 1)
             {
                 target = args[0];
@@ -25,8 +26,14 @@ namespace MarkdownWikiGenerator
                 target = args[0];
                 dest = args[1];
             }
+            else if (args.Length == 3) 
+            {
+                target = args[0];
+                dest = args[1];
+                namespaceMatch = args[2];
+            }
 
-            var types = MarkdownGenerator.Load(target);
+            var types = MarkdownGenerator.Load(target, namespaceMatch);
 
             // Home Markdown Builder
             var homeBuilder = new MarkdownBuilder();

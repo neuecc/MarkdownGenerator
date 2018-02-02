@@ -11,6 +11,7 @@ Clone and open solution, build console application.
 Command Line Argument
 - `[0]` = dll src path
 - `[1]` = output directory 
+- `[2]` = regex pattern to select namespaces (optional)
 
 Put .xml on same directory, use document comment for generate.
 
