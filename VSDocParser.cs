@@ -48,7 +48,16 @@ namespace MarkdownWikiGenerator
                     var memberType = (MemberType)match.Groups[1].Value[0];
                     if (memberType == MemberType.None) return null;
 
-                    var summary = ((string)x.Element("summary")) ?? "";
+                    var summaryXml = x.Elements("summary").FirstOrDefault()?.ToString() 
+                        ?? x.Element("summary")?.ToString() 
+                        ?? "";
+                    summaryXml = Regex.Replace(summaryXml, @"<\/?summary>", string.Empty);
+                    summaryXml = Regex.Replace(summaryXml, @"<para\s*/>", Environment.NewLine);
+                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
+                    var parsed = Regex.Replace(summaryXml, @"<(type)*paramref name=""([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
+
+                    var summary = parsed; // ((string)x.Elements("summary").First()) ?? "";
+
                     if (summary != "")
                     {
                         summary = string.Join("  ", summary.Split(new[] { "\r", "\n", "\t" }, StringSplitOptions.RemoveEmptyEntries).Select(y => y.Trim()));
