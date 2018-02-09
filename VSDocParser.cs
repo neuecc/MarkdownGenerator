@@ -36,30 +36,32 @@ namespace MarkdownWikiGenerator
 
     public static class VSDocParser
     {
+        public static XmlDocumentComment[] ParseXmlComment(XDocument xDocument) {
+            return ParseXmlComment(xDocument, null);
+        }
+
         // cheap, quick hack parser:)
-        public static XmlDocumentComment[] ParseXmlComment(XDocument xDoc)
-        {
-            return xDoc.Descendants("member")
-                .Select(x =>
-                {
+        internal static XmlDocumentComment[] ParseXmlComment(XDocument xDocument, string namespaceMatch) {
+            return xDocument.Descendants("member")
+                .Select(x => {
                     var match = Regex.Match(x.Attribute("name").Value, @"(.):(.+)\.([^.()]+)?(\(.+\)|$)");
                     if (!match.Groups[1].Success) return null;
 
                     var memberType = (MemberType)match.Groups[1].Value[0];
                     if (memberType == MemberType.None) return null;
 
-                    var summaryXml = x.Elements("summary").FirstOrDefault()?.ToString() 
-                        ?? x.Element("summary")?.ToString() 
+                    var summaryXml = x.Elements("summary").FirstOrDefault()?.ToString()
+                        ?? x.Element("summary")?.ToString()
                         ?? "";
                     summaryXml = Regex.Replace(summaryXml, @"<\/?summary>", string.Empty);
                     summaryXml = Regex.Replace(summaryXml, @"<para\s*/>", Environment.NewLine);
-                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
+                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", m => ResolveSeeElement(m, namespaceMatch));
+
                     var parsed = Regex.Replace(summaryXml, @"<(type)*paramref name=""([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
 
-                    var summary = parsed; // ((string)x.Elements("summary").First()) ?? "";
+                    var summary = parsed;
 
-                    if (summary != "")
-                    {
+                    if (summary != "") {
                         summary = string.Join("  ", summary.Split(new[] { "\r", "\n", "\t" }, StringSplitOptions.RemoveEmptyEntries).Select(y => y.Trim()));
                     }
 
@@ -74,8 +76,7 @@ namespace MarkdownWikiGenerator
                         ? match.Groups[2].Value + "." + match.Groups[3].Value
                         : match.Groups[2].Value;
 
-                    return new XmlDocumentComment
-                    {
+                    return new XmlDocumentComment {
                         MemberType = memberType,
                         ClassName = className,
                         MemberName = match.Groups[3].Value,
@@ -87,6 +88,16 @@ namespace MarkdownWikiGenerator
                 })
                 .Where(x => x != null)
                 .ToArray();
+        }
+
+        private static string ResolveSeeElement(Match m, string ns) {
+            var typeName = m.Groups[1].Value;
+            if (!string.IsNullOrWhiteSpace(ns)) {
+                if (typeName.StartsWith(ns)) {
+                    return $"[{typeName}]({Regex.Replace(typeName, $"\\.(?:.(?!\\.))+$", me => me.Groups[0].Value.Replace(".", "#").ToLower())})";
+                }
+            }
+            return $"`{typeName}`";
         }
 
         class Item1EqualityCompaerer<T1, T2> : EqualityComparer<Tuple<T1, T2>>
