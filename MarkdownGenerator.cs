@@ -158,8 +158,7 @@ namespace MarkdownWikiGenerator
             mb.AppendLine();
 
             var desc = commentLookup[type.FullName].FirstOrDefault(x => x.MemberType == MemberType.Type)?.Summary ?? "";
-            if (desc != "")
-            {
+            if (desc != "") {
                 mb.AppendLine(desc);
             }
             {
@@ -216,7 +215,7 @@ namespace MarkdownWikiGenerator
             XmlDocumentComment[] comments = new XmlDocumentComment[0];
             if (File.Exists(xmlPath))
             {
-                comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)));
+                comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)), namespaceMatch);
             }
             var commentsLookup = comments.ToLookup(x => x.ClassName);
 
