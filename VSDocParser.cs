@@ -53,10 +53,11 @@ namespace MarkdownWikiGenerator
                         ?? "";
                     summaryXml = Regex.Replace(summaryXml, @"<\/?summary>", string.Empty);
                     summaryXml = Regex.Replace(summaryXml, @"<para\s*/>", Environment.NewLine);
-                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
-                    var parsed = Regex.Replace(summaryXml, @"<(type)*paramref name=""([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
+                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", ResolveSeeElement);
 
-                    var summary = parsed; // ((string)x.Elements("summary").First()) ?? "";
+                    var parsed = Regex.Replace(summaryXml, @"<(type)*paramref name=""([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
+                        
+                    var summary = parsed;
 
                     if (summary != "")
                     {
@@ -87,6 +88,14 @@ namespace MarkdownWikiGenerator
                 })
                 .Where(x => x != null)
                 .ToArray();
+        }
+
+        private static string ResolveSeeElement(Match m) {
+            var typeName = m.Groups[1].Value;
+            if (typeName.Split('.')[0] == "AnyQ") {
+                return $"[{typeName}]({Regex.Replace(typeName, $"\\.(?:.(?!\\.))+$", me => me.Groups[0].Value.Replace(".", "#").ToLower())})";
+            }
+            return $"`{typeName}`";
         }
 
         class Item1EqualityCompaerer<T1, T2> : EqualityComparer<Tuple<T1, T2>>
