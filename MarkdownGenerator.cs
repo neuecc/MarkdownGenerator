@@ -141,7 +141,7 @@ namespace MarkdownWikiGenerator
 
                 var data = seq.Select(item2 =>
                 {
-                    var summary = docs.FirstOrDefault(x => x.MemberName == name(item2))?.Summary ?? "";
+                    var summary = docs.FirstOrDefault(x => x.MemberName == name(item2) || x.MemberName.StartsWith(name(item2) + "`"))?.Summary ?? "";
                     return new[] { MarkdownBuilder.MarkdownCodeQuote(type(item2)), finalName(item2), summary };
                 });
 
