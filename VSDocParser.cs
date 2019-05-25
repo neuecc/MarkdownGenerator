@@ -42,6 +42,9 @@ namespace MarkdownWikiGenerator
 
         // cheap, quick hack parser:)
         internal static XmlDocumentComment[] ParseXmlComment(XDocument xDocument, string namespaceMatch) {
+
+            var assemblyName = xDocument.Descendants("assembly").First().Elements("name").First().Value;
+
             return xDocument.Descendants("member")
                 .Select(x => {
                     var match = Regex.Match(x.Attribute("name").Value, @"(.):(.+)\.([^.()]+)?(\(.+\)|$)");
@@ -55,7 +58,7 @@ namespace MarkdownWikiGenerator
                         ?? "";
                     summaryXml = Regex.Replace(summaryXml, @"<\/?summary>", string.Empty);
                     summaryXml = Regex.Replace(summaryXml, @"<para\s*/>", Environment.NewLine);
-                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", m => ResolveSeeElement(m, namespaceMatch));
+                    summaryXml = Regex.Replace(summaryXml, @"<see cref=""\w:([^\""]*)""\s*\/>", m => ResolveSeeElement(m, assemblyName));
 
                     var parsed = Regex.Replace(summaryXml, @"<(type)*paramref name=""([^\""]*)""\s*\/>", e => $"`{e.Groups[1].Value}`");
 
