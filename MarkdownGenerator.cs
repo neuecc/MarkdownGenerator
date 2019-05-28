@@ -182,8 +182,10 @@ namespace MarkdownWikiGenerator
 
             if (type.IsEnum)
             {
+                var underlyingEnumType = Enum.GetUnderlyingType(type);
+
                 var enums = Enum.GetNames(type)
-                    .Select(x => new { Name = x, Value = ((Int32)Enum.Parse(type, x)) })
+                    .Select(x => new { Name = x, Value = (Convert.ChangeType(Enum.Parse(type, x), underlyingEnumType)) })
                     .OrderBy(x => x.Value)
                     .ToArray();
 
