@@ -1,22 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace MarkdownWikiGenerator
 {
-    class Program
+    internal class Program
     {
-        // 0 = dll src path, 1 = dest root
-        static void Main(string[] args)
+        // 0 = DLL source path, 1 = destination root
+        private static void Main(string[] args)
         {
-            // put dll & xml on same diretory.
-            var target = "UniRx.dll"; // :)
-            string dest = "md";
+            // put DLL & XML on same directory.
+            string target = null;
+            string dest = "docs";
             string namespaceMatch = string.Empty;
+
+            if (args.Length == 0)
+            {
+                Console.WriteLine("DLL file location is a required argument");
+                Environment.Exit(1);
+            }
             if (args.Length == 1)
             {
                 target = args[0];
@@ -26,29 +29,32 @@ namespace MarkdownWikiGenerator
                 target = args[0];
                 dest = args[1];
             }
-            else if (args.Length == 3) 
+            else if (args.Length == 3)
             {
                 target = args[0];
                 dest = args[1];
                 namespaceMatch = args[2];
             }
 
-            var types = MarkdownGenerator.Load(target, namespaceMatch);
+            MarkdownableType[] types = MarkdownGenerator.Load(target, namespaceMatch);
 
             // Home Markdown Builder
-            var homeBuilder = new MarkdownBuilder();
+            MarkdownBuilder homeBuilder = new MarkdownBuilder();
             homeBuilder.Header(1, "References");
             homeBuilder.AppendLine();
 
-            foreach (var g in types.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
+            foreach (IGrouping<string, MarkdownableType> g in types.GroupBy(x => x.Namespace).OrderBy(x => x.Key))
             {
-                if (!Directory.Exists(dest)) Directory.CreateDirectory(dest);
+                if (!Directory.Exists(dest))
+                {
+                    Directory.CreateDirectory(dest);
+                }
 
                 homeBuilder.HeaderWithLink(2, g.Key, g.Key);
                 homeBuilder.AppendLine();
 
-                var sb = new StringBuilder();
-                foreach (var item in g.OrderBy(x => x.Name))
+                StringBuilder sb = new StringBuilder();
+                foreach (MarkdownableType item in g.OrderBy(x => x.Name))
                 {
                     homeBuilder.ListLink(MarkdownBuilder.MarkdownCodeQuote(item.BeautifyName), g.Key + "#" + item.BeautifyName.Replace("<", "").Replace(">", "").Replace(",", "").Replace(" ", "-").ToLower());
 
