@@ -5,15 +5,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace MarkdownWikiGenerator
 {
     public class MarkdownableType
     {
-        readonly Type type;
-        readonly ILookup<string, XmlDocumentComment> commentLookup;
+        private readonly Type type;
+        private readonly ILookup<string, XmlDocumentComment> commentLookup;
 
         public string Namespace => type.Namespace;
         public string Name => type.Name;
@@ -25,21 +24,16 @@ namespace MarkdownWikiGenerator
             this.commentLookup = commentLookup;
         }
 
-        MethodInfo[] GetMethods()
-        {
-            return type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
+        private MethodInfo[] GetMethods() => type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any() && !x.IsPrivate)
                 .ToArray();
-        }
 
-        PropertyInfo[] GetProperties()
-        {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty)
+        private PropertyInfo[] GetProperties() => type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
                 .Where(y =>
                 {
-                    var get = y.GetGetMethod(true);
-                    var set = y.GetSetMethod(true);
+                    MethodInfo get = y.GetGetMethod(true);
+                    MethodInfo set = y.GetSetMethod(true);
                     if (get != null && set != null)
                     {
                         return !(get.IsPrivate && set.IsPrivate);
@@ -58,37 +52,25 @@ namespace MarkdownWikiGenerator
                     }
                 })
                 .ToArray();
-        }
 
-        FieldInfo[] GetFields()
-        {
-            return type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.SetField)
+        private FieldInfo[] GetFields() => type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.SetField)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any() && !x.IsPrivate)
                 .ToArray();
-        }
 
-        EventInfo[] GetEvents()
-        {
-            return type.GetEvents(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+        private EventInfo[] GetEvents() => type.GetEvents(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
                 .ToArray();
-        }
 
-        FieldInfo[] GetStaticFields()
-        {
-            return type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.SetField)
+        private FieldInfo[] GetStaticFields() => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetField | BindingFlags.SetField)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any() && !x.IsPrivate)
                 .ToArray();
-        }
 
-        PropertyInfo[] GetStaticProperties()
-        {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty)
+        private PropertyInfo[] GetStaticProperties() => type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.GetProperty | BindingFlags.SetProperty)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
                 .Where(y =>
                 {
-                    var get = y.GetGetMethod(true);
-                    var set = y.GetSetMethod(true);
+                    MethodInfo get = y.GetGetMethod(true);
+                    MethodInfo set = y.GetSetMethod(true);
                     if (get != null && set != null)
                     {
                         return !(get.IsPrivate && set.IsPrivate);
@@ -107,22 +89,16 @@ namespace MarkdownWikiGenerator
                     }
                 })
                 .ToArray();
-        }
 
-        MethodInfo[] GetStaticMethods()
-        {
-            return type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
+        private MethodInfo[] GetStaticMethods() => type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly | BindingFlags.InvokeMethod)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any() && !x.IsPrivate)
                 .ToArray();
-        }
 
-        EventInfo[] GetStaticEvents()
-        {
-            return type.GetEvents(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+        private EventInfo[] GetStaticEvents() => type.GetEvents(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Where(x => !x.IsSpecialName && !x.GetCustomAttributes<ObsoleteAttribute>().Any())
                 .ToArray();
-        }
-        void BuildTable<T>(MarkdownBuilder mb, string label, T[] array, IEnumerable<XmlDocumentComment> docs, Func<T, string> type, Func<T, string> name, Func<T, string> finalName)
+
+        private void BuildTable<T>(MarkdownBuilder mb, string label, T[] array, IEnumerable<XmlDocumentComment> docs, Func<T, string> type, Func<T, string> name, Func<T, string> finalName)
         {
             if (array.Any())
             {
@@ -139,9 +115,9 @@ namespace MarkdownWikiGenerator
                     seq = array.OrderBy(x => name(x));
                 }
 
-                var data = seq.Select(item2 =>
+                IEnumerable<string[]> data = seq.Select(item2 =>
                 {
-                    var summary = docs.FirstOrDefault(x => x.MemberName == name(item2) || x.MemberName.StartsWith(name(item2) + "`"))?.Summary ?? "";
+                    string summary = docs.FirstOrDefault(x => x.MemberName == name(item2) || x.MemberName.StartsWith(name(item2) + "`"))?.Summary ?? "";
                     return new[] { MarkdownBuilder.MarkdownCodeQuote(type(item2)), finalName(item2), summary };
                 });
 
@@ -152,24 +128,25 @@ namespace MarkdownWikiGenerator
 
         public override string ToString()
         {
-            var mb = new MarkdownBuilder();
+            MarkdownBuilder mb = new MarkdownBuilder();
 
             mb.HeaderWithCode(2, Beautifier.BeautifyType(type, false));
             mb.AppendLine();
 
-            var desc = commentLookup[type.FullName].FirstOrDefault(x => x.MemberType == MemberType.Type)?.Summary ?? "";
-            if (desc != "") {
+            string desc = commentLookup[type.FullName].FirstOrDefault(x => x.MemberType == MemberType.Type)?.Summary ?? "";
+            if (desc != "")
+            {
                 mb.AppendLine(desc);
             }
             {
-                var sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
 
-                var stat = (type.IsAbstract && type.IsSealed) ? "static " : "";
-                var abst = (type.IsAbstract && !type.IsInterface && !type.IsSealed) ? "abstract " : "";
-                var classOrStructOrEnumOrInterface = type.IsInterface ? "interface" : type.IsEnum ? "enum" : type.IsValueType ? "struct" : "class";
+                string stat = (type.IsAbstract && type.IsSealed) ? "static " : "";
+                string abst = (type.IsAbstract && !type.IsInterface && !type.IsSealed) ? "abstract " : "";
+                string classOrStructOrEnumOrInterface = type.IsInterface ? "interface" : type.IsEnum ? "enum" : type.IsValueType ? "struct" : "class";
 
                 sb.AppendLine($"public {stat}{abst}{classOrStructOrEnumOrInterface} {Beautifier.BeautifyType(type, true)}");
-                var impl = string.Join(", ", new[] { type.BaseType }.Concat(type.GetInterfaces()).Where(x => x != null && x != typeof(object) && x != typeof(ValueType)).Select(x => Beautifier.BeautifyType(x)));
+                string impl = string.Join(", ", new[] { type.BaseType }.Concat(type.GetInterfaces()).Where(x => x != null && x != typeof(object) && x != typeof(ValueType)).Select(x => Beautifier.BeautifyType(x)));
                 if (impl != "")
                 {
                     sb.AppendLine("    : " + impl);
@@ -182,7 +159,7 @@ namespace MarkdownWikiGenerator
 
             if (type.IsEnum)
             {
-                var underlyingEnumType = Enum.GetUnderlyingType(type);
+                Type underlyingEnumType = Enum.GetUnderlyingType(type);
 
                 var enums = Enum.GetNames(type)
                     .Select(x => new { Name = x, Value = (Convert.ChangeType(Enum.Parse(type, x), underlyingEnumType)) })
@@ -212,19 +189,19 @@ namespace MarkdownWikiGenerator
     {
         public static MarkdownableType[] Load(string dllPath, string namespaceMatch)
         {
-            var xmlPath = Path.Combine(Directory.GetParent(dllPath).FullName, Path.GetFileNameWithoutExtension(dllPath) + ".xml");
+            string xmlPath = Path.Combine(Directory.GetParent(dllPath).FullName, Path.GetFileNameWithoutExtension(dllPath) + ".xml");
 
             XmlDocumentComment[] comments = new XmlDocumentComment[0];
             if (File.Exists(xmlPath))
             {
                 comments = VSDocParser.ParseXmlComment(XDocument.Parse(File.ReadAllText(xmlPath)), namespaceMatch);
             }
-            var commentsLookup = comments.ToLookup(x => x.ClassName);
+            ILookup<string, XmlDocumentComment> commentsLookup = comments.ToLookup(x => x.ClassName);
 
-            var namespaceRegex = 
+            Regex namespaceRegex =
                 !string.IsNullOrEmpty(namespaceMatch) ? new Regex(namespaceMatch) : null;
 
-            var markdownableTypes = new[] { Assembly.LoadFrom(dllPath) }
+            MarkdownableType[] markdownableTypes = new[] { Assembly.LoadFrom(dllPath) }
                 .SelectMany(x =>
                 {
                     try
@@ -250,8 +227,10 @@ namespace MarkdownWikiGenerator
             return markdownableTypes;
         }
 
-        static bool IsRequiredNamespace(Type type, Regex regex) {
-            if ( regex == null ) {
+        private static bool IsRequiredNamespace(Type type, Regex regex)
+        {
+            if (regex == null)
+            {
                 return true;
             }
             return regex.IsMatch(type.Namespace != null ? type.Namespace : string.Empty);
