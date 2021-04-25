@@ -141,7 +141,15 @@ namespace MarkdownWikiGenerator
 
                 var data = seq.Select(item2 =>
                 {
-                    var summary = docs.FirstOrDefault(x => x.MemberName == name(item2) || x.MemberName.StartsWith(name(item2) + "`"))?.Summary ?? "";
+                    var candidates = docs.Where(x => x.MemberName == name(item2) || x.MemberName.StartsWith(name(item2) + "`")).ToArray();
+                    if (candidates.Count() >= 2 && item2 is MethodBase)
+                    {
+                        // Attempt to identify method overloads
+                        var methodParameterNames = (item2 as MethodBase).GetParameters().Select(p => p.Name);
+                        var overloadCandidates = candidates.Where(x => x.Parameters.Keys.SequenceEqual(methodParameterNames)).ToArray();
+                        if (overloadCandidates.Any()) { candidates = overloadCandidates; }
+                    }
+                    var summary = candidates.FirstOrDefault()?.Summary ?? "";
                     return new[] { MarkdownBuilder.MarkdownCodeQuote(type(item2)), finalName(item2), summary };
                 });
 
