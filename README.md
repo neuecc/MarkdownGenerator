@@ -1,22 +1,36 @@
-MarkdownGenerator
-===
+# MarkdownGenerator
+
+![License](https://img.shields.io/github/license/neuecc/MarkdownGenerator)
+![StarsCount](https://img.shields.io/github/stars/neuecc/MarkdownGenerator)
+![ForksCount](https://img.shields.io/github/forks/neuecc/MarkdownGenerator)
+
+
 Generate markdown from C# binary & xml document for GitHub Wiki.
 
 Sample: See [UniRx/wiki](https://github.com/neuecc/UniRx/wiki)
 
-How to Use
----
+## Useage
+
 Clone and open solution, build console application.
 
-Command Line Argument
-- `[0]` = dll src path
-- `[1]` = output directory 
-- `[2]` = regex pattern to select namespaces (optional)
+### Syntax
+
+```
+MarkdownGenerator.exe <dll file path> <output dir> [regex pattern]
+```
+
+### Parameters
+
+Parameter|Description
+---|---
+`<dll file path>`|DLL file path to generate markdown file(s)
+`<output dir>`|Output dir path of the generated markdown file(s)
+`[regex pattern]`|RegEx pattern to select namespaces *(optional)*
+
+### Example
 
 Put .xml on same directory, use document comment for generate.
 
-for example
-
-```
-MarkdownGenerator.exe UniRx.dll md
+```cmd
+> MarkdownGenerator.exe UniRx.dll docs
 ```
