@@ -1,5 +1,10 @@
 # MarkdownGenerator
 
+![License](https://img.shields.io/github/license/neuecc/MarkdownGenerator)
+![StarsCount](https://img.shields.io/github/stars/neuecc/MarkdownGenerator)
+![ForksCount](https://img.shields.io/github/forks/neuecc/MarkdownGenerator)
+
+
 Generate markdown from C# binary & xml document for GitHub Wiki.
 
 Sample: See [UniRx/wiki](https://github.com/neuecc/UniRx/wiki)
@@ -14,7 +19,7 @@ Clone and open solution, build console application.
 MarkdownGenerator.exe <dll file path> <output dir> [regex pattern]
 ```
 
-### Parameter
+### Parameters
 
 Parameter|Description
 ---|---
